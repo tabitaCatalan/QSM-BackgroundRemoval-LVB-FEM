@@ -31,6 +31,11 @@ folder_name = generate_folder_name(peel, gridsize, closesize, elemsize, keep_rat
 folder_path = strcat('../results/', folder_name, '/');
 mkdir(folder_path)
 
+% generates a file with the folder name
+fileID = fopen('folder_name.txt','w');
+fprintf(fileID,'%s',folder_name);
+fclose(fileID);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Plotting data of mesh and saving image
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

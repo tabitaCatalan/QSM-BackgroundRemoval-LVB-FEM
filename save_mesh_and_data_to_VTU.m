@@ -5,7 +5,7 @@ function save_mesh_and_data_to_VTU(nodes, faces, elems, point_data, filename)
 % - faces: triangle node indices, each row is a triangle
 % - elems: element list of the tetrahedral mesh
 % - point_data
-% - filename: without extension. It can include a folder of destination; if
+% - filename: without extension. It can include an existing folder of destination; if
 %   it doesn't, file is saved in current directory.
 %   Example: 'mesh' or 'data/mesh'.
 % 
@@ -65,6 +65,6 @@ fprintf(fileID,'%s\n','</PointData>');
 fprintf(fileID,'%s\n','</Piece>');
 fprintf(fileID,'%s\n','</UnstructuredGrid>');
 fprintf(fileID,'%s\n','</VTKFile>');
-disp(strcat('File ', file, ' ready!'))
+disp('File ready!')
 end
 

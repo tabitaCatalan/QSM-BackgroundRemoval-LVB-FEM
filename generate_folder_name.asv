@@ -1,0 +1,13 @@
+function [outputArg1,outputArg2] = generate_folder_name(peel, gridsize, closesize, elemsize, keep_ratio, vol_factor)
+% Generates a char (which depends on arguments used to generate a mesh), to
+% be used as folder name for results
+% Input:
+% - peel: how many voxels were eroded from the original mask
+% - see unstructured_meshing for details of the other inputs
+% Output:
+% - name: char with a folder name
+formatSpec = "p%d_g%d_c%s-e%d-k%c-v%f";
+outputArg1 = inputArg1;
+outputArg2 = inputArg2;
+end
+

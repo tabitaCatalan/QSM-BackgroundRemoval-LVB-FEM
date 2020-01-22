@@ -16,9 +16,9 @@ imagesc3d2(Mask_bet - msk, N/2, 3, [90,90,-90], [-1,1], [], 'Mask\_bet - msk')
 
 imagesc3d2(eroded5, N/2, 4, [90,90,-90], [0,1], [], 'Mask\_bet eroded, peel = 5')
 
-imagesc3d2(Mask_bet - eroded5, N/2, 5, [90,90,-90], [0,1], [], 'Mask\_bet - eroded by peel=5 Mask\_bet')
+imagesc3d2(Mask_bet - eroded5, N/2, 5, [90,90,-90], [-1,1], [], 'Mask\_bet - eroded by peel=5 Mask\_bet')
 
-imagesc3d2(msk - eroded5, N/2, 6, [90,90,-90], [0,1], [], 'msk - eroded by peel=5 Mask\_bet')
+imagesc3d2(msk - eroded5, N/2, 6, [90,90,-90], [-1,1], [], 'msk - eroded by peel=5 Mask\_bet')
 
-imagesc3d2(phs_unwrap, N/2, 7, [90,90,-90], [0,1], [], 'msk - eroded by peel=5 Mask\_bet')
+imagesc3d2(phs_unwrap, N/2, 7, [90,90,-90], [-pi,pi], [], 'phase\_unwrap')
 

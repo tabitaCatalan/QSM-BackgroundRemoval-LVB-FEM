@@ -70,8 +70,6 @@ if avg_size > 0
 end
 
 figure(fig_num)
-set(gcf, 'color', 'k')
-
 if ~MIP
     if axis_square
         figure(fig_num), subplot(131), imagesc( imrotate(squeeze(mean(img(pos(1)-Lavg_size:pos(1)+Ravg_size,:,:),1)), rot_deg(1)), scale_fig ), axis square off, colormap gray
@@ -93,13 +91,16 @@ else
         figure(fig_num), subplot(133), imagesc( imrotate(squeeze(min(img(:,:,pos(3)-Lavg_size:pos(3)+Ravg_size),[],3), rot_deg(3))), scale_fig ), axis image off, colormap gray    
     end
 end
-colorbar
-caxis('auto')
+% color bar
+hp3 = get(subplot(1,3,3),'Position');
+colorbar('Position', [hp3(1)+hp3(3)+0.01  hp3(2)  0.1*hp3(3)  hp3(4)])
+caxis(scale_fig)
+% common title
 a = axes;
 t1 = title(title_fig, 'color', 'w', 'fontsize', 24);
 a.Visible = 'off'; % set(a,'Visible','off');
 t1.Visible = 'on'; % set(t1,'Visible','on');
-
-    
+plot([],[])
+set(gcf, 'color', 'k')
 end
 

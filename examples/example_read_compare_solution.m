@@ -16,15 +16,15 @@ addpath('../')
 load phs_unwrap;
 
 %load mask_p0;
-load mask_p1;
-%load mask_p5;
+%load mask_p1;
+load mask_p5;
 
 %load phs_lbv_p0;
-load phs_lbv_p1;
-%load phs_lbv_p5;
+%load phs_lbv_p1;
+load phs_lbv_p5;
 
-mask = mask_p1;
-phs_lbv = phs_lbv_p1;
+mask = mask_p5;
+phs_lbv = phs_lbv_p5;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Read solution from VTU
@@ -78,12 +78,14 @@ N = [160 160 160];
 
 imagesc3d2(phs_lbv, N/2, 1, [90,90,-90], [-pi,pi], [], 'phs\_lbv')
 saveas(gcf, strcat(path,'phs_lbv.png'))
-
+close
 imagesc3d2(phs_fem, N/2, 2, [90,90,-90], [-pi,pi], [], 'phs\_fem')
 saveas(gcf, strcat(path,'phs_fem.png'))
+close
 % Comparacion
-imagesc3d2(phs_fem - phs_lbv, N/2, 3, [90,90,-90], [-0.5,0.5], [], 'phs\_fem - phs\_lbv with peel = 1')
+imagesc3d2(phs_fem - phs_lbv, N/2, 3, [90,90,-90], [-0.5,0.5], [], 'phs\_fem - phs\_lbv')
 saveas(gcf, strcat(path,'phs_lbv-phs_fem.png'))
+close
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,123 +105,108 @@ phs_scale_tissue_FEM = phs_fem/phs_scale;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% 3D Polyfit
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-imagesc3d2(phs_unwrap, N/2, 1, [90,90,-90], [-pi,pi], [], 'Unwrapped Phase')
-saveas(gcf,'images/results_01_phase_unwrapped.png')
-%close
-
-imagesc3d2(phs_tissue, N/2, 2, [90,90,-90], [-0.05,0.05], [], 'Phase Tissue LBV FMG + 3d polyfit')
-saveas(gcf,'images/results_02_phase_tissue_lbv_fmg_poly.png')
-%close
-
-imagesc3d2(phs_tissue_FEM.*msk, N/2, 3, [90,90,-90], [-0.05,0.05], [], 'Phase Tissue LBV FEM')
-colorbar
-caxis('auto')
-saveas(gcf,'images/results_03_phase_tissue_lbv_fem.png')
-%close
-%% 3d polynomial fit to remove transmit phase from LBV
+% 3d polynomial fit to remove transmit phase from LBV
 % Roemer coil combination fails to remove B1+ phase and includes some
 % contribution from B1- of the body coil 
-%%-------------------------------------------------------------------------
+
 disp('Fitting 3d polynomial to remove transmit phase')
-Order = 4;      % degree of 3d polyfit
+
+order = 4;      % degree of 3d polyfit
+[phs_tissue_FEM_final, removed_poly_FEM] = remove_transmit_phase(phs_scale_tissue_FEM, mask, order);
+[phs_tissue_LBV_final, removed_poly_LBV] = remove_transmit_phase(phs_scale_tissue_LBV, mask, order);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Plotting final phase tissue
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+imagesc3d2(phs_tissue_LBV_final, N/2, 4, [90,90,-90], [-0.05,0.05], [], 'Final Phase Tissue LBV')
+saveas(gcf, strcat(path,'phs_tissue_lbv_final.png'))
+close
+
+imagesc3d2(phs_tissue_FEM_final, N/2, 5, [90,90,-90], [-0.05,0.05], [], 'Final Phase Tissue FEM')
+saveas(gcf, strcat(path,'phs_tissue_fem_final.png'))
+close
+
+% Comparacion
+imagesc3d2(phs_tissue_FEM_final - phs_tissue_LBV_final, N/2, 6, [90,90,-90], [-0.05,0.05], [], 'Difference Phase Tissue (FEM - LBV)')
+saveas(gcf, strcat(path,'phs_tissue_fem_final-phs_tissue_lbv_final.png'))
+close
+
+imagesc3d2(removed_poly_FEM, N/2, 7, [90,90,-90], [-0.05,0.05], [], 'Fitted 3D Polynomial FEM')
+saveas(gcf,strcat(path,'removed_poly_FEM.png'))
+close
+
+imagesc3d2(removed_poly_LBV, N/2, 8, [90,90,-90], [-0.05,0.05], [], 'Fitted 3D Polynomial LBV')
+saveas(gcf,strcat(path,'removed_poly_LBV.png'))
+close
+
+imagesc3d2(removed_poly_FEM - removed_poly_LBV, N/2, 9, [90,90,-90], [-0.05,0.05], [], 'Difference of Fitted 3D Polynomials (FEM-LBV)')
+saveas(gcf,strcat(path,'removed_poly_FEM-LBV.png'))
+close
 
 
-tic
-    I_fitted = polyfit3D_NthOrder(phs_tissue_FEM, msk, Order);
-toc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Create dipole kernel
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% subtract fitted phase
-phs_tissue_FEM_final = (phs_tissue_FEM - I_fitted ).* msk;
-
-%%
-disp('Plotting corrected results')
-imagesc3d2(phs_tissue_FEM_final, N/2, 4, [90,90,-90], [-0.05,0.05], [], 'Remove Tx phase: normalized field map')
-set(gcf, 'color', [1,1,1]*0.15), colorbar, set(gca, 'fontsize', 32)
-caxis('auto')
-saveas(gcf,'images/results_04_phase_tissue_lbv_fem_3dpoly.png')
-%close
-
-imagesc3d2(I_fitted.*msk, N/2, 5, [90,90,-90], [-0.05,0.05], [], 'Removed component')
-set(gcf, 'color', [1,1,1]*0.15), colorbar, set(gca, 'fontsize', 32)
-caxis('auto')
-saveas(gcf,'images/results_05_removed_component.png')
-%close
-
-
-%% create dipole kernel
-%%-------------------------------------------------------------------------
-disp('Getting susceptibility with TKD')
 load spatial_res;
 
-[ky,kx,kz] = meshgrid(-N(1)/2:N(1)/2-1, -N(2)/2:N(2)/2-1, -N(3)/2:N(3)/2-1);
+kernel = dipole_kernel(N, spatial_res);
 
-kx = (kx / max(abs(kx(:)))) / spatial_res(1);
-ky = (ky / max(abs(ky(:)))) / spatial_res(2);
-kz = (kz / max(abs(kz(:)))) / spatial_res(3);
+% display
+%kernel_disp = fftshift(mean(abs(kernel), 4));
+%mosaic(squeeze(kernel_disp(1+end/2,:,:)), 1, 1, 10, '', [0,2/3]) 
+%close
 
-k2 = kx.^2 + ky.^2 + kz.^2;
-
-
-R_tot = eye(3);     % orientation matrix for transverse acquisition
-
-
-kernel = fftshift( 1/3 - (kx * R_tot(3,1) + ky * R_tot(3,2) + kz * R_tot(3,3)).^2 ./ (k2 + eps) );    
-
-
-kernel_disp = fftshift(mean(abs(kernel), 4));
-mosaic(squeeze(kernel_disp(1+end/2,:,:)), 1, 1, 6, '', [0,2/3])
-
- 
-
-%%-------------------------------------------------------------------------
-%% TKD recon
-%%-------------------------------------------------------------------------
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Inversion with TKD
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 thre_tkd = 0.19;      % TKD threshold parameter
 
+chi_tkd_FEM = TKD(thre_tkd, N, kernel, phs_tissue_FEM_final, mask);
+chi_tkd_LBV = TKD(thre_tkd, N, kernel, phs_tissue_LBV_final, mask);
 
-kernel_inv = zeros(N);
-kernel_inv( abs(kernel) > thre_tkd ) = 1 ./ kernel(abs(kernel) > thre_tkd);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Plotting Results
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+imagesc3d2(chi_tkd_FEM, N/2, 11, [90,90,-90], [-0.10,0.1], [], 'TKD FEM')
+saveas(gcf,strcat(path,'chi_tkd_fem.png'))
+close
 
-chi_tkd_FEM = real( ifftn( fftn(phs_tissue_FEM_final) .* kernel_inv ) ) .* msk; 
-chi_tkd = real( ifftn( fftn(phs_tissue) .* kernel_inv ) ) .* msk; 
+imagesc3d2(chi_tkd_LBV, N/2, 12, [90,90,-90], [-0.10,0.1], [], 'TKD LBV')
+saveas(gcf,strcat(path,'chi_tkd_fem.png'))
+close
 
-disp('Ploting results')
-%%
-imagesc3d2(chi_tkd, N/2, 7, [90,90,-90], [-0.10,0.14], [], 'TKD LBV')
-colorbar
-caxis('auto')
-saveas(gcf,'images/results_06_chi_tkd_lbv_fmg.png')
-%close
+imagesc3d2(chi_tkd_FEM - chi_tkd_LBV, N/2, 13, [90,90,-90], [-0.10,0.1], [], 'TKD FEM - LBV')
+saveas(gcf,strcat(path,'chi_tkd_fem-lbv.png'))
+close
 
-imagesc3d2(chi_tkd_FEM, N/2, 8, [90,90,-90], [-0.10,0.14], [], 'TKD FEM')
-colorbar
-caxis('auto')
-saveas(gcf,'images/results_07_chi_tkd_lbv_fem.png')
-%close
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Compute RMS error
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-disp('Images were stored in images/')
-%% compute error
 disp('Computing rmse error')
 load chi_cosmos;
-rmse_tkd_cosmos = compute_rmse(chi_tkd, chi_cosmos)
-rmse_tkd_cosmos_FEM = compute_rmse(chi_tkd_FEM, chi_cosmos)
-%%
-imagesc3d2(chi_cosmos - chi_tkd_FEM, N/2, 9, [90,90,-90], [-0.1,0.1], [], 'Error LBV')
-colorbar
-caxis('auto')
-saveas(gcf,'images/results_08_chi_cosmos-lbv.png')
 
-imagesc3d2(chi_cosmos - chi_tkd, N/2, 10, [90,90,-90], [-0.1,0.1], [], 'Error FEM')
-colorbar
-caxis('auto')
-saveas(gcf,'images/results_09_chi_cosmos-fem.png')
-%%
-imagesc3d2(chi_tkd - chi_tkd_FEM, N/2, 11, [90,90,-90], [-0.1,0.1], [], 'LBV - FEM')
-colorbar
-caxis('auto')
-saveas(gcf,'images/results_10_chi_lbv-fem.png')
+% creates file to save log, or overwrites it if exists 
+log_id = fopen(strcat(path,'rmse.txt'),'w');
+fclose(log_id);
+
+diary(convertStringsToChars(strcat(path, 'rmse.txt')))
+    rmse_tkd_cosmos_LBV = compute_rmse(chi_tkd_LBV, chi_cosmos)
+    rmse_tkd_cosmos_FEM = compute_rmse(chi_tkd_FEM, chi_cosmos)
+diary off
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Plot error with respect to COSMOS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+imagesc3d2(chi_cosmos - chi_tkd_LBV, N/2, 14, [90,90,-90], [-0.1,0.1], [], 'Error LBV')
+saveas(gcf,strcat(path,'chi_cosmos-lbv.png'))
+close
+
+imagesc3d2(chi_cosmos - chi_tkd_FEM, N/2, 15, [90,90,-90], [-0.1,0.1], [], 'Error FEM')
+saveas(gcf,strcat(path,'chi_cosmos-fem.png'))
+close

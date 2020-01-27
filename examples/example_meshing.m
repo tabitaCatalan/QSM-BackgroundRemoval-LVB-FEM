@@ -20,15 +20,21 @@ addpath('../../iso2mesh/') % This line should be changed, path to iso2mesh
 addpath('../data/')
 addpath('../')
 
-load Mask_bet;             
+load mask_p0.mat;
+load mask_p1.mat;
+load mask_p5.mat;
 load phs_unwrap.mat;    
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Erode mask
+%%% Use eroded mask
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-peel = 1;
-mask = erode_mask(Mask_bet, peel);
+mask = mask_p5;
+
+% Be sure to use the right peel
+% peel = 0; % if using mask_p0
+% peel = 1; % if using mask_p1
+peel = 5; % if using mask_p5
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Set mesh parameters

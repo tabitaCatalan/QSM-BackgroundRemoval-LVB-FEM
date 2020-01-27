@@ -8,12 +8,27 @@
 
 addpath('../data/')
 addpath('../')
-addpath('../MEDI_toolbox/') % to use LBV
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Load data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+load phs_unwrap;
+
+%load mask_p0;
+load mask_p1;
+%load mask_p5;
+
+%load phs_lbv_p0;
+load phs_lbv_p1;
+%load phs_lbv_p5;
+
+mask = mask_p1;
+phs_lbv = phs_lbv_p1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Read solution from VTU
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 fileID = fopen('folder_name.txt');
 folder_name = fgetl(fileID);
@@ -37,11 +52,6 @@ harmonic_noise = solution{5};
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Interpolation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-disp('Loading data from QSM2016ReconChallenge')
-
-load phs_unwrap; % phase from trans orient processed with Laplacian unwrapping and BET masking (in radians)
-load Mask_bet;
-load phs_tissue; % tissue phase from transversal orientation (in ppm, normalized by gyro*TE*B0)
 
 [X,Y,Z]=meshgrid(1:160,1:160,1:160);
 X=double(X);
@@ -51,26 +61,34 @@ Z=double(Z);
 phs_harmonic = griddata(points(index,1), points(index,2), points(index,3), harmonic_noise(index), X, Y, Z);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Data and solution exploration 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-tol = 1e-2;         % default
-depth = -1;         % default
-peel = 5;           % no of voxels to peel from the mask boundary
-     
-tic
-    Phase_lbv = LBV(Phase_unwrapped, Mask_bet, N, spatial_res, tol, depth, peel);
-toc
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Data correction
+%%% Getting phase from FEM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % change NaN to 0
-% msk = (~isnan(phs_harmonic)).*msk;
 phs_harmonic(isnan(phs_harmonic))=0;
 
-% Escale
+phs_fem = (phs_unwrap - phs_harmonic).*mask;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Data exploration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+N = [160 160 160];
+
+imagesc3d2(phs_lbv, N/2, 1, [90,90,-90], [-pi,pi], [], 'phs\_lbv')
+saveas(gcf, strcat(path,'phs_lbv.png'))
+
+imagesc3d2(phs_fem, N/2, 2, [90,90,-90], [-pi,pi], [], 'phs\_fem')
+saveas(gcf, strcat(path,'phs_fem.png'))
+% Comparacion
+imagesc3d2(phs_fem - phs_lbv, N/2, 3, [90,90,-90], [-0.5,0.5], [], 'phs\_fem - phs\_lbv with peel = 1')
+saveas(gcf, strcat(path,'phs_lbv-phs_fem.png'))
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Escaling
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 load prot;  % header information
 
 TE = prot.alTE * 1e-6;           % sec
@@ -79,14 +97,12 @@ gyro = 2*pi*42.58;
 
 phs_scale = TE * gyro * B0;
 
-phs_tissue_FEM = (phs_unwrap - phs_harmonic)/phs_scale;
+phs_scale_tissue_LBV = phs_lbv/phs_scale;
+phs_scale_tissue_FEM = phs_fem/phs_scale;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Data and solution exploration 
+%%% 3D Polyfit
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-disp('Plotting results')
-N = size(msk);
 
 imagesc3d2(phs_unwrap, N/2, 1, [90,90,-90], [-pi,pi], [], 'Unwrapped Phase')
 saveas(gcf,'images/results_01_phase_unwrapped.png')

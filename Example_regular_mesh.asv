@@ -25,7 +25,7 @@ SEG = mask_p0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Make folder
 
-folder_name = 'regular_mesh_p0_smooth_data';
+folder_name = 'regular_mesh_p0_smooth_da';
 path = strcat('results/',folder_name,'/');
 mkdir(path)
 
@@ -141,7 +141,6 @@ toc
 %%
 %[new_nodes2,new_faces2]=surfreorient(new_nodes,new_faces);
 
-phs_unwrap_smooth = smooth3(phs_unwrap);
 
 
 
@@ -150,7 +149,7 @@ X=double(X);
 Y=double(Y);
 Z=double(Z);
 
-phs_unwrap_scalar = interp3(X,Y,Z,phs_unwrap_smooth,new_nodes(:,1),new_nodes(:,2),new_nodes(:,3),'linear');
+phs_unwrap_scalar = interp3(X,Y,Z,phs_unwrap,new_nodes(:,1),new_nodes(:,2),new_nodes(:,3),'linear');
 
 %%%%%%
 %%% Saving data

@@ -8,7 +8,7 @@ cell_type1 = zeros(1,size(elem_n,1))'+10;
 cell_ID1 = ((1:length(tetra(:,1)))*4)';
 nodevol = squeeze(nodevolume(nodes_n,elem));
 
-fileID = fopen(strcat('results/', filename, '.vtu'),'w');
+fileID = fopen(strcat(filename, '.vtu'),'w');
 fprintf(fileID,'%s\n','<?xml version="1.0"?>');
 fprintf(fileID,'%s\n','<VTKFile type="UnstructuredGrid"  version="0.1"  >');
 fprintf(fileID,'%s\n','<UnstructuredGrid>');

@@ -1,1 +1,1 @@
-p5_g0-4_c0-0_e1-6_k0-6_v10-0
+regular_mesh_p0_smooth_data

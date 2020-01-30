@@ -16,15 +16,15 @@ addpath('../')
 load phs_unwrap;
 
 %load mask_p0;
-%load mask_p1;
-load mask_p5;
+load mask_p1;
+%load mask_p5;
 
 %load phs_lbv_p0;
-%load phs_lbv_p1;
-load phs_lbv_p5;
+load phs_lbv_p1;
+%load phs_lbv_p5;
 
-mask = mask_p5;
-phs_lbv = phs_lbv_p5;
+mask = mask_p1;
+phs_lbv = phs_lbv_p1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Read solution from VTU
@@ -118,7 +118,7 @@ order = 4;      % degree of 3d polyfit
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Plotting final phase tissue
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%
 imagesc3d2(phs_tissue_LBV_final, N/2, 4, [90,90,-90], [-0.05,0.05], [], 'Final Phase Tissue LBV')
 saveas(gcf, strcat(path,'phs_tissue_lbv_final.png'))
 close
@@ -131,20 +131,20 @@ close
 imagesc3d2(phs_tissue_FEM_final - phs_tissue_LBV_final, N/2, 6, [90,90,-90], [-0.05,0.05], [], 'Difference Phase Tissue (FEM - LBV)')
 saveas(gcf, strcat(path,'phs_tissue_fem_final-phs_tissue_lbv_final.png'))
 close
-
-imagesc3d2(removed_poly_FEM, N/2, 7, [90,90,-90], [-0.05,0.05], [], 'Fitted 3D Polynomial FEM')
+%%
+imagesc3d2(removed_poly_FEM.*mask, N/2, 7, [90,90,-90], [-0.05,0.05], [], 'Fitted 3D Polynomial FEM')
 saveas(gcf,strcat(path,'removed_poly_FEM.png'))
 close
 
-imagesc3d2(removed_poly_LBV, N/2, 8, [90,90,-90], [-0.05,0.05], [], 'Fitted 3D Polynomial LBV')
+imagesc3d2(removed_poly_LBV.*mask, N/2, 8, [90,90,-90], [-0.05,0.05], [], 'Fitted 3D Polynomial LBV')
 saveas(gcf,strcat(path,'removed_poly_LBV.png'))
 close
-
-imagesc3d2(removed_poly_FEM - removed_poly_LBV, N/2, 9, [90,90,-90], [-0.05,0.05], [], 'Difference of Fitted 3D Polynomials (FEM-LBV)')
+%%
+imagesc3d2((removed_poly_FEM - removed_poly_LBV).*mask, N/2, 9, [90,90,-90], [-0.05,0.05], [], {'Difference of Fitted 3D Polynomials','(FEM-LBV)'})
 saveas(gcf,strcat(path,'removed_poly_FEM-LBV.png'))
 close
 
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Create dipole kernel
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -170,19 +170,20 @@ chi_tkd_LBV = TKD(thre_tkd, N, kernel, phs_tissue_LBV_final, mask);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Plotting Results
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%
 imagesc3d2(chi_tkd_FEM, N/2, 11, [90,90,-90], [-0.10,0.1], [], 'TKD FEM')
 saveas(gcf,strcat(path,'chi_tkd_fem.png'))
 close
 
 imagesc3d2(chi_tkd_LBV, N/2, 12, [90,90,-90], [-0.10,0.1], [], 'TKD LBV')
-saveas(gcf,strcat(path,'chi_tkd_fem.png'))
+saveas(gcf,strcat(path,'chi_tkd_lbv.png'))
 close
+
 
 imagesc3d2(chi_tkd_FEM - chi_tkd_LBV, N/2, 13, [90,90,-90], [-0.10,0.1], [], 'TKD FEM - LBV')
 saveas(gcf,strcat(path,'chi_tkd_fem-lbv.png'))
 close
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Compute RMS error
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

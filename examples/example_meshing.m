@@ -1,5 +1,5 @@
 % This file shows an example of how to get and unstructured mesh from
-% a 3D binary data and save to a VTU file.
+% a 3D binary mask and save it to a VTU file.
 % Mesh data is stored in a folder inside results/, its name depending on
 % the parameters used to generate the mesh (gridsize, closesize, elemsize,
 % keep_ratio, vol_factor) and the peel used to erode the mask.

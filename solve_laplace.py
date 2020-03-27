@@ -4,6 +4,12 @@ import os
 from dolfin import *
 
 def solve_laplace(path, filename):
+  """
+  It solves the laplace equation using the mesh path + filename + '.vtu'.
+  It saves a file 'Solution.pvd' in path.
+  path: folder path where vtu file is stored
+  filename: name of the mesh, without format.
+  """
 
   # Read mesh and data
   geometry = meshio.read(path + filename + ".vtu")

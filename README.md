@@ -30,19 +30,21 @@ sudo apt install libhdf5-dev python3-h5py
 In folder [examples](examples/) can be found files to run an example. To try this it was used Matlab2018a and FEniCS *version*, running in a Windows 10 computer with [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 1. Run the script `example_meshing.m` in Matlab. It assumes that [examples](examples/) is your current directory. This script relies strongly on *iso2mesh*, so be sure of modifying the line `addpath('../../iso2mesh/')` before running, to ensure it coincides with your own path to the library. `example_meshing.m` generates a new folder `p5_g1-0_c0-0_e1-0_k0-4_v30-0/` inside of [results](results/) (the name of the folder depends on the parameters used to generate the mesh). Inside this folder, a `mesh_data.vtu` with data of the created mesh and the *unwrapped phase* is stored. It also saves some pictures with mesh information and a file `log_mesh.txt` with information about the created mesh.
-2. Run `example_solving.py`; this needs _FEniCS_. This will solve the Poisson's Equation using data from `mesh_data.vtu`. Before running, be sure that the file `folder_name.txt` contains a single line with the name of the folder inside of [results](results/) where `mesh_data.vtu` is stored. The results will be saved in the same folder. This script will read the data of the mesh and solve the Poisson's equation, using the *unwrapped phase* as boundary condition, to obtain the background field, with is stored in a `Solution000001.vtu` and can be visualized using Paraview.
+2. Run `example_solving.py`; this needs _FEniCS_. This will solve the Poisson's Equation using data from `mesh_data.vtu`. Before running, be sure that the file `folder_name.txt` contains a single line with the name of the folder inside of [results](results/) where `mesh_data.vtu` is stored. The results will be saved in the same folder. This script will read the data of the mesh and solve the Poisson's equation, using the *unwrapped phase* as boundary condition, to obtain the background field, with is stored in a `Solution000001.vtu` and can be visualized using [Paraview](https://www.paraview.org).
 3. Run the script `example_read_compare_solution.m` in Matlab. This will use `Solution000001.vtu` to obtain the *phase tissue*. Be sure of modifying the Load data section, to use the mask with the right level of peeling.
 
 ## Documentation
 ### data
-*description of files*
 
 - `Mask_bet.mat`: brain mask from *BET*
 - `msk.mat`: is a brain mask, obtained by eroding the *BET* mask by 5 voxels (by setting `peel=5` in *LBV*)
 - `phs_unwrap.mat`: phase from trans orient processed with *Laplacian unwrapping* and *BET* masking 
-- `mask_p0`, `mask_p1`, `mask_p5`: obtained by running `example_get_mask_from_LBV.m` in `examples/` folder.
+- `mask_p0.mat`, `mask_p1.mat`, `mask_p5.mat`: obtained by running `example_get_mask_from_LBV.m` in `examples/` folder. Masks used by LBV Full Multigrid Method (See Reference 1.), with peels=$0,1,5$.
+- `phs_lbv_p0.mat`, `phs_lbv_p1.mat`, `phs_lbv_p5.mat`: obtained by running `example_get_mask_from_LBV.m` in `examples/` folder. Solutions (in radians) obtained with LBV Full Multigrid Method (See Reference 1.), with peels=$0,1,5$.
 
-(in radians)
+## References
+1. Zhou, Dong & Liu, Tian & Spincemaille, Pascal & Wang, Yi. (2014). Background field removal by solving the Laplacian boundary value problem. NMR in biomedicine. 27. 10.1002/nbm.3064. 
+
 
 ## Credits
 - This code was based on the source code and data for the QSM 2016 Reconstruction Challenge, released by Berkin Bilgic at http://martinos.org/~berkin/software.html.

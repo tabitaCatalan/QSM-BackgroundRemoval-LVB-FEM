@@ -1,0 +1,17 @@
+\newpage
+\section{Resumen}
+
+La remoción del campo de fondo (\textit{background field removal}) es una etapa importante para generar mapas de susceptibilidad magnética mediante QSM. Una forma de lograrlo es la propuesta por Zhou, Liu, Spincemaille y Wang en \cite{lbv_fmg}, que aprovecha la armonicidad del campo de fondo al interior de la región de interés (ROI) para plantear una Ecuación de Laplace. Las condiciones de borde para el campo de fondo son desconocidas, pero pueden aproximarse por las del campo total, debido a que este es uno o dos órdenes de magnitud superior al campo local. En \cite{lbv_fmg}, la ecuación se resuelve mediante el Método de Diferencias Finitas, utilizando un esquema multigrilla. El objetivo del presente trabajo es resolver la ecuación mediante el Método de Elementos Finitos.
+
+El trabajo realizado se separa en tres etapas:
+
+\begin{enumerate}
+    \item \textbf{Generar la malla:} Para resolver la ecuación con Elementos Finitos se necesita una malla de tetrahedros. Esta se genera en Matlab a partir de una \textit{máscara} del cerebro, obtenida a partir de los datos de MRI medidos. Se trabaja con dos tipos de malla: regular y no regular. La malla regular se crea replicando una triangulación de un cubo en cada agrupación cúbica de 8 vóxels. Para la malla no regular se usa el toolbox \href{http://iso2mesh.sourceforge.net/cgi-bin/index.cgi}{iso2mesh} de Matlab.
+    \item \textbf{Resolver la ecuación con FEniCS:} \href{https://fenicsproject.org}{FEniCS} es una plataforma computacional de código abierto, con interfaz de alto nivel en Python. Permite resolver EDPs con el método de elementos finitos a partir de la formulación variacional en una malla de tetrahedros.
+    \item \textbf{Visualizar resultados y comparar:} Finalmente, los resultados obtenidos con FEniCS se importan a Matlab, donde se termina el proceso de QSM con la etapa de Reconstrucción. Para estudiar la eficacia del método, se usan datos de \cite{challenge} y se comparan con métricas como \textit{Root Mean Squared Error} (RMSE).
+\end{enumerate}
+
+Los códigos escritos pueden encontrarse en \cite{github}. El presente informe pretende ser una síntesis de lo realizado, así como una guía para entender y usar los códigos escritos.
+
+
+El trabajo se llevó a cabo en el Centro de Imágenes Biomédicas UC, a cargo del profesor Cristián Tejos del Departamento de Ingeniería Eléctrica de la Universidad Católica.

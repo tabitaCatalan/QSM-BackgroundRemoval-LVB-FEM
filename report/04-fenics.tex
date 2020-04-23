@@ -1,0 +1,87 @@
+\newpage
+
+% Explicación detallada del trabajo realizado y los resultados obtenidos (máximo 3 páginas).
+\section{Resolver la ecuación con FEniCS}
+
+\href{https://fenicsproject.org}{FEniCS} es una plataforma computacional de códi-go abierto, con interfaz de alto nivel en Python. Permite resolver EDPs con el método de elementos finitos a partir de la formulación variacional en una malla de tetrahedros. Debe usarse desde una terminal de Linux. Se puede usar desde otro sistema operativo mediante \href{https://www.docker.com}{Docker} o \href{https://docs.microsoft.com/en-us/windows/wsl/install-win10}{Windows Subsystem for Linux}.
+
+Una vez que contamos con una malla de en formato \texttt{.vtu}, esta puede ser importada a FEniCS. La función para hacer esto es \texttt{solve\_laplace}, del archivo \texttt{solve\_laplace.py} de \cite{github}. Esta función tiene por argumentos \texttt{path}; un \texttt{str} con la dirección a la carpeta donde se encuentra la malla, y \texttt{filename}; el nombre del archivo \texttt{.vtu} donde está guardada la malla (sin extensión). La función obtendrá los datos de la malla, 
+
+\begin{sourcecodep}{python}{numbers=none}{}
+geometry = meshio.read(path + filename + ".vtu")
+\end{sourcecodep}
+
+los pasará a un archivo \texttt{.xdmf} que quedará guardado en \texttt{path}, y luego creará una malla que puede ser usada por \texttt{Dolfin} para resolver el problema usando Elementos Finitos. Se usan elementos de Lagrange de grado 1, lo que se expresa en la línea:
+\begin{sourcecodep}{python}{numbers=none}{}
+V = FunctionSpace(mesh, "CG", 1) 
+\end{sourcecodep}
+Suponemos además que los datos de la fase $\phi_T$ están guardados en el archivo \texttt{.vtu}, y serán leídos en la instrucción
+
+\begin{sourcecodep}{python}{numbers=none}{}
+point_data = geometry.point_data
+\end{sourcecodep}
+
+para guardarse en un archivo \texttt{.xdmf}, que después es leído, y los datos quedan guardados en la función  \texttt{upha}.
+
+Para el problema 
+
+\[
+\left\{
+\begin{array}{rll}
+-\Delta u &= 0 & \text{en} \,\, \Omega \\
+u &= \phi_T & \text{en} \,\, \partial \Omega
+\end{array}
+\right.
+\]
+ 
+podemos multiplicar por una función test $v$, integrar en $\Omega$ e integrar por partes para obtener su formulación variacional:
+
+\[
+\left\{
+\begin{array}{rll}
+\displaystyle{a(u,v):= \int_{\Omega} \nabla u \nabla v - \int_{\partial \Omega} \nabla u \cdot n v} &= 0=: L(v) & \forall v \in V\\
+u &= \phi_T & \text{en} \,\, \partial \Omega
+\end{array}
+\right.
+\]
+
+donde $n$ es la normal al borde $\partial \Omega$ de la ROI, apuntando hacia afuera. Para resolver el problema en FEniCS escribimos:
+
+\begin{sourcecodep}{python}{numbers=none}{}
+n = FacetNormal(mesh) # normal
+
+u = TrialFunction(V)
+v = TestFunction(V)
+F = inner(grad(u), grad(v))*dx -dot(n,grad(u))*v*ds
+
+# Separate left and right sides of equation
+a, L = lhs(F), rhs(F)
+\end{sourcecodep}
+
+Las condiciones de borde Dirichlet se imponen de la siguiente forma:
+
+\begin{sourcecodep}{python}{numbers=none}{}
+class Boundary(SubDomain):
+    def inside(self, x, on_boundary):
+        return on_boundary
+
+bc = DirichletBC(V, upha, Boundary())
+\end{sourcecodep}
+
+Para resolver el problema se eligió usar el solver \texttt{cg} (conjugate gradient method), que funciona bien para resolver la ecuación de Laplace. Para más opciones ver \cite{solvers}.
+
+\begin{sourcecodep}{python}{numbers=none}{}
+u = Function(V)
+solve(a == L, u, bc, solver_parameters={'linear_solver': 'cg', 'preconditioner': 'ilu'})
+\end{sourcecodep}
+
+Es posible correr esto en paralelo (ver \cite{mpirun}), pero antes se debe cambiar el precondicionador \texttt{ilu} por uno que sí se pueda usar junto a \texttt{mpirun}.\\
+
+Finalmente, la función guardará la solución en un archivo \texttt{Solution.pvd}, dentro del directorio entregado en el argumento \texttt{path}. Este archivo puede ser visualizado usando herramientas como \href{https://www.paraview.org}{ParaView} (ver Figura \ref{img:paraview}).
+
+\begin{images}[\label{img:paraview}]{Una solución vista en Paraview}
+    \addimage{Solution.PNG}{height=5cm}{Malla}
+    \addimage{Solution-slice.PNG}{height=5cm}{Un corte}
+\end{images}
+
+ Puede verse un ejemplo del uso de la función \texttt{solve\_laplace} en \texttt{examples/example\_solving.py}. El script supone que la malla está guardada en alguna carpeta dentro de \texttt{results/}, y que el nombre de esa carpeta está escrito en el archivo \texttt{examples/folder\_name.txt}.

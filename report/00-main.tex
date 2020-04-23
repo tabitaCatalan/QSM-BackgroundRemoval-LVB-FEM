@@ -1,0 +1,106 @@
+% Template:     Informe/Reporte LaTeX
+% Documento:    Archivo principal
+% Versión:      6.7.0 (19/11/2019)
+% Codificación: UTF-8
+%
+% Autor: Pablo Pizarro R.
+%        Facultad de Ciencias Físicas y Matemáticas
+%        Universidad de Chile
+%        pablo@ppizarror.com
+%
+% Manual template: [https://latex.ppizarror.com/informe]
+% Licencia MIT:    [https://opensource.org/licenses/MIT]
+
+% CREACIÓN DEL DOCUMENTO
+\documentclass[letterpaper,11pt]{article} % Articulo tamaño carta, 11pt
+
+% INFORMACIÓN DEL DOCUMENTO
+\def\titulodelinforme {\textit{Background field removal} usando el Método de Elementos Finitos}
+\def\temaatratar {}
+
+\def\autordeldocumento {Tabita Catalán Muñoz}
+\def\nombredelcurso {}
+\def\codigodelcurso {}
+
+\def\nombreuniversidad {Universidad de Chile}
+\def\nombrefacultad {Facultad de Ciencias Físicas y Matemáticas}
+\def\departamentouniversidad {Departamento de Ingeniería Matemática}
+\def\imagendepartamento {departamentos/dim}
+\def\imagendepartamentoescala {0.2}
+\def\localizacionuniversidad {Santiago, Chile}
+
+% INTEGRANTES, PROFESORES Y FECHAS
+
+\def\tablaintegrantes {
+\begin{tabular}{ll}
+	Estudiante:
+	& \begin{tabular}[t]{l}
+		\autordeldocumento{}
+	\end{tabular} \\
+	Lugar:
+	& \begin{tabular}[t]{l}
+		Centro de Imágenes Biomédicas UC
+	\end{tabular} \\
+	Evaluador:
+	& \begin{tabular}[t]{l}
+		Cristián Tejos
+	\end{tabular} \\
+	& \\
+	\multicolumn{2}{l}{Fecha de inicio: 18 de diciembre de 2019} \\
+	\multicolumn{2}{l}{Fecha de término: 31 de enero de 2020} \\
+	\multicolumn{2}{l}{\localizacionuniversidad}
+\end{tabular}}{
+}
+
+% CONFIGURACIONES
+\input{lib/config}
+
+% IMPORTACIÓN DE LIBRERÍAS
+\input{lib/env/imports}
+
+% IMPORTACIÓN DE FUNCIONES Y ENTORNOS
+\input{lib/cmd/all}
+
+% IMPORTACIÓN DE ESTILOS
+\input{lib/style/all}
+
+% CONFIGURACIÓN INICIAL DEL DOCUMENTO
+\input{lib/cfg/init}
+
+\setlength{\parindent}{0cm}
+
+% INICIO DE LAS PÁGINAS
+\begin{document}
+	
+% PORTADA
+\input{lib/page/portrait} % Se puede borrar
+
+% CONFIGURACIÓN DE PÁGINA Y ENCABEZADOS
+\input{lib/cfg/page}
+
+% RESUMEN O ABSTRACT
+%\begin{resumen}
+%	\lipsum[1] % Párrafo ejemplo, se puede borrar
+%\end{resumen}
+
+% TABLA DE CONTENIDOS - ÍNDICE
+\input{lib/page/index} % Se puede borrar
+
+% CONFIGURACIONES FINALES
+\input{lib/cfg/final}
+
+% ======================= INICIO DEL DOCUMENTO =======================
+
+\input{01-resumen.tex}
+\input{02-contexto.tex}
+\input{03-malla.tex}
+\input{04-fenics.tex}
+\input{05-resultados.tex}
+\input{055-analisis.tex}
+\input{06-anexos.tex}
+
+\newpage
+\bibliography{references}
+
+% FIN DEL DOCUMENTO
+\end{document}

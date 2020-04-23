@@ -1,0 +1,81 @@
+\newpage
+
+% Descripción de la empresa, laboratorio o centro de investigación, y de la unidad específica donde tuvo lugar el trabajo. Definición de la problemática (máximo 1 página).
+\section{Contexto}
+
+
+\subsection{Quatitative Susceptibility Mapping}
+
+Lo siguiente es una síntesis de la introducción de \cite{tesis}.
+
+La susceptibilidad magnética es una medida de cuánto se magnetiza un material al aplicar un campo magnético. Dentro del contexto de Imagen por Resonancia Magnética (MRI), \textit{Quatitative Susceptibility Mapping} (QSM) es una técnica que busca generar un mapa de susceptibilidad, mediante la aplicación de un campo magnético $B_0$ (que supondremos s.p.g. en la dirección $z$) a los tejidos, y la medición de una señal. Las diferencias en el campo magnético que excita a cada molécula se traducen en un cambio en la señal medida.
+
+Si se cuenta con la distribución de susceptibilidad magnética $\chi$, es posible calcular el desfase en la señal mediante:
+
+\begin{equation}\label{conv}
+\Delta \phi = d * (\chi-\chi_{\text{aire}})
+\end{equation}
+
+donde $*$ es el operador de convolución y $d$ es el campo del kernel dipolar, del cual conocemos su transformada de Fourier:
+$$
+\mathcal{F}d[k] = D[k] =  \gamma B_0 \cdot TE \cdot \left( \frac{1}{3} - \frac{k_z^2}{k^2}\right),
+$$
+donde $\gamma$ es la constante giromagnética del hidrógeno y $TE$ es el tiempo de eco, un parámetro de adquisición conocido. A esto se le conoce como \textbf{problema directo}.
+
+El desafío está en el \textbf{problema inverso}: encontrar la distribución de susceptibilidad a partir de las diferencias de fase. Uno podría simplemente aplicar Transformada de Fourier en (\ref{conv}), lo que transforma la convolución en multiplicación puntual. Lamentablemente, en el dominio de Fourier hay una superficie  (llamada cono mágico) donde el kernel dipolar vale $0$, lo que genera valores indefinidos al dividir. Además, el problema está ``mal puesto'', por lo que el ruido tiende a amplificarse al invertir.
+
+Es por esto que el problema se resuelve en varias etapas (ver Figura \ref{img:qsm}).
+
+\begin{enumerate}
+    \item La primera dificultad es que la fase en bruto (\textit{raw phase}) está ``envuelta''; esto pues los ángulos se miden en un rango de $-\pi$ a $\pi$, mientras que el verdadero rango podría ser mucho mayor. El algoritmo más común para corregir esto es el \textit{Laplacian unwrapping}, dando lugar a la fase sin envolver (\textit{unwrapped phase}). 
+    \item La siguiente dificultad es eliminar las contribuciones al campo magnético inducidas por fuentes externas (el resto del cuerpo, por ejemplo). Esto incluye cavidades de aire, como los senos nasales o la boca. Esta etapa se conoce como \textit{Background field removal}, y es la que nos interesa en este trabajo.
+    \item La última etapa consiste en reconstruir la susceptibilidad a partir de la fase, para lo cual hay varios métodos como TKD o COSMOS.
+\end{enumerate}
+
+\insertimage[\label{img:qsm}]{QSM.PNG}{width=.8\linewidth}{Etapas para obtener un mapa de susceptibilidad a partir de una adquisición.}
+
+\subsection{Background field removal}
+
+Los métodos actuales para realizar \textit{Background Removal} pueden dividirse en 3 tipos:
+\begin{itemize}
+    \item Basados en la propiedad del Valor Medio para funciones armónicas (SHARP) (ver \cite{sharp}).
+    \item Basados en resolver la Ecuación de Laplace (LBV).
+    \item Basados en proyección sobre la base ortogonal de las funciones armónicas (PDF) (ver \cite{pdf}).
+\end{itemize}
+
+Uno de los mejores métodos hasta la fecha es el descrito en \cite{lbv_fmg}, el cual resuelve la Ecuación de Laplace con el Método de Diferencias Finitas, usando un esquema multigrilla (FMG). A este método lo llamaremos LBV de ahora en adelante. El objetivo del trabajo es resolver la Ecuación de Laplace mediante el Método de Elementos Finitos (FEM), y comparar los resultados obtenidos con los de \cite{lbv_fmg}, idealmente superándolos.
+
+Las etapas anteriores de QSM permiten obtener datos del campo magnético total $f_T$. Se busca separar el campo magnético local $f_L$, que es producido dentro de la región de interés (ROI), que llamaremos $\Omega$, del campo magnético de fondo $f_B$, que es producido por tejidos fuera de la ROI, y del cual se sabe que es armónico (su laplaciano es $0$). Luego:
+
+\[
+\left\{
+\begin{array}{rll}
+     f_T & = f_L + f_B & \\
+     \Delta f_B = \displaystyle{\left(\frac{\partial^2}{\partial x^2} + \frac{\partial^2}{\partial y^2} + \frac{\partial^2}{\partial z^2}\right)} f_B & = 0 & \text{en} \,\, \Omega
+\end{array}
+\right.
+\]
+Para resolver esto necesitamos condiciones de borde para $f_B$, las que no están fácilmente disponibles. Sin embargo, es sabido que el campo local $f_L$ es en muchos casos uno o dos órdenes de magnitud menor que el campo de fondo $f_B$ ($f_L \ll f_B$). Luego, podemos aproximar $f_B|_{\partial \Omega} = f_T|_{\partial \Omega}$.
+
+Con esto, planteamos finalmente el problema que buscamos resolver:
+
+\[
+\left\{
+\begin{array}{rll}
+\Delta f_B &= 0 & \text{en} \,\, \Omega \\
+f_B &= f_T & \text{en} \,\, \partial \Omega
+\end{array}
+\right.
+\]
+
+Finalmente, lo obtenido a partir de las etapas anteriores de QSM es lo que llamamos \textit{fase desenrollada}, que denotamos $\phi_T$. Se sabe que $\phi \propto f_T$, y debido a la linealidad del problema, podemos simplemente buscar la fase que viene del campo de fondo $\phi_B$:
+
+\[
+\left\{
+\begin{array}{rll}
+\Delta \phi_B &= 0 & \text{en} \,\, \Omega \\
+\phi_B &= \phi_T & \text{en} \,\, \partial \Omega
+\end{array}
+\right.
+\]
+

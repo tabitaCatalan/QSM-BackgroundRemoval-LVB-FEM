@@ -1,0 +1,35 @@
+\newpage
+\section{Anexos} \label{anexos}
+
+\subsection{Datos} \label{datos}
+
+La carpeta \texttt{data/} contiene varios archivos. A continuación se dará un breve descripción de ellos. A menos que se indique lo contrario, los datos fueron obtenidos de \cite{challenge}.
+\begin{itemize}
+    \item \texttt{Mask\_bet.mat}: máscara del cerebro obtenida mediante BET (\textit{Brain Extraction Tool}, un método para segmentar imágenes del cerebro obtenidas por resonancia magnética).
+    \item \texttt{msk.mat}: una máscara del cerebro, obtenida a partir de erosionar \texttt{Mask\_bet.mat} en 5 vóxeles.
+    \item \texttt{phs\_unwrap.mat}: fase después de \textit{Laplacian unwrapping}, y enmascarada por \texttt{Mask\_bet.mat}.
+    \item \texttt{mask\_p0}, \texttt{mask\_p1}, \texttt{mask\_p5}, \texttt{phs\_lbv\_p0.mat}, \texttt{phs\_lbv\_p1.mat}, \texttt{phs\_lbv\_p5.mat}: obtenidos corriendo el script \texttt{examples/example\_get\_mask\_from\_LBV.m}, el cual obtiene las máscaras usadas por el método LBV de \texttt{MEDI\_toolbox}.
+\end{itemize}
+
+\subsection{Parámetros para malla no regular}\label{noref}
+
+La malla no regular usada para obtener los resultados se obtuvo mediante el script \texttt{example\_meshing.m}, utilizando la función \texttt{unstructured\_meshing} con los parámetros de la Tabla \ref{table:noreg}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+Parámetro & Valor \\
+\hline
+\texttt{gridsize} & $0.4$ \\
+\texttt{closesize} & $0$ \\
+\texttt{elemsize} & $1.6$ \\
+\texttt{keep\_ratio} & $0.6$ \\
+\texttt{vol\_factor} & $10$ \\
+\hline
+\end{tabular}
+\caption{Parámetro de \texttt{unstructured\_meshing} para malla no regular}
+\label{table:noreg}
+\end{table}
+
+

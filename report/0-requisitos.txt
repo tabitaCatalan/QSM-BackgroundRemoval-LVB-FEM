@@ -1,0 +1,28 @@
+Estructura
+
+Portada
+Debe incluir un título; nombre del estudiante; empresa, laboratorio o centro de investigación donde
+se realizó; nombre y cargo del evaluador; período en que se llevó a cabo (máximo 1 página).
+
+Resúmenes
+Tanto de la práctica actual como de las anteriores (máximo 1 página).
+
+Contexto
+Descripción de la empresa, laboratorio o centro de investigación, y de la unidad específica donde tuvo lugar el trabajo. Definición de la problemática (máximo 1 página).
+
+Objetivos y Metodología
+Lo que se espera lograr con la práctica. Se puede incluir algún indicador de cumplimiento.
+Enumeración y descripción breve de las actividades realizadas y de los hitos alcanzados en el proceso. Resumen de las herramientas matemáticas utilizadas (máximo 2 páginas).
+
+Desarrollo
+Explicación detallada del trabajo realizado y los resultados obtenidos (máximo 3 páginas).
+
+Conclusiones
+Evaluación crítica del desarrollo de la práctica, señalando logros y limitaciones (máximo 1 página).
+
+Bibliografía
+Opcional (máximo 1 página).
+Anexos
+Información relevante que no pueda ser incluida en las partes anteriores debido a las limitaciones
+de extensión. Puede incluir desde tablas y figuras hasta demostraciones matemáticas. Opcional (sin
+limitación de número de páginas).

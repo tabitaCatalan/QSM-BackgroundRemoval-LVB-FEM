@@ -1,0 +1,125 @@
+
+\newpage
+\section{Análisis de resultados}
+
+Se aplican los dos métodos de \textit{background removal}: por un lado, LBV con el esquema FMG (a este método lo llamaremos simplemente LBV), a través de la implementación del \texttt{MEDI toolbox} (\cite{lbv_fmg}); por otro lado, el método planteado FEM para las diferentes mallas obtenidas. Estos métodos permiten obtener una \textit{phase tissue}, a la que se le quitó además un polinomio 3D de orden 4 ajustado a los datos (como se muestra en \cite{challenge}), y se normalizó por $\gamma \cdot TE \cdot B_0$.
+
+Se prueban distintos niveles de erosión: se desea un erosión mínima o nula que permita estudiar la corteza cerebral, pero al resolver el problema sin erosión se incrementa mucho el error. 
+
+\subsection{Erosión de 5 vóxeles}
+
+Con una erosión de 5 vóxeles, LBV obtiene los resultados de la Figura \ref{img:lbv-p5}.
+
+\insertimage[\label{img:lbv-p5}]{lbv-p5.PNG}{width=.85\linewidth}{\textit{Phase tissue} obtenida con LBV, en ppm, con erosión de 5 vóxeles.}
+
+\subsubsection{FEM: Malla no regular}
+
+Usando FEM con una malla no regular (ver \nameref{noreg} en \nameref{anexos}) se obtienen los resultados de la Figura \ref{img:fem-noreg-p5}, los cuales son bastante similares a los logrados por LBV. Las flechas rojas, sin embargo, apuntan a artefactos que no están presentes en LBV, los cuales se originan probablemente en vóxeles perdidos al interpolar datos a la malla. 
+
+\insertimage[\label{img:fem-noreg-p5}]{final-tissue-fem-ppm-esc.PNG}{width=.85\linewidth}{\textit{Phase tissue} obtenida con FEM, en ppm, con erosión de 5 vóxeles.}
+
+Las mayores diferencias entre FEM y LBV se encuentran en el borde, como muestra la Figura \ref{img:fem-noreg-lbv-p5}.
+
+\insertimage[\label{img:fem-noreg-lbv-p5}]{tissue-fem-lbv-ppm.PNG}{width=.85\linewidth}{Diferencia de \textit{phase tissue} FEM - LBV, en ppm, con erosión de 5 vóxeles.}
+
+
+\subsubsection{FEM: Malla regular}
+
+Usando una malla regular vemos los resultados de la Figura \ref{img:fem-reg-p5}. En la figura central es especialmente notoria una zona negra en el borde superior derecho de la imagen, la que se debe probablemente al problema que se mencionó con el mallado regular: la pérdida de vóxeles en los grupos incompletos de 8 nodos vecinos.
+
+\insertimage[\label{img:fem-reg-p5}]{tissue-fem-p5-reg.PNG}{width=.85\linewidth}{\textit{Phase tissue} obtenida con FEM, en ppm, con erosión de 5 vóxeles.}
+
+Esta vez en la Figura \ref{img:fem-reg-lbv-p5} vemos claramente una componente suave en la diferencia entre los métodos. Lamentablemente no se logró seguir estudiando esto, por lo que no se sabe cuál de los dos métodos la eliminó correctamente. En caso de que haya sido FEM, daría un motivo para seguir estudiando el método.
+
+\insertimage[\label{img:fem-reg-lbv-p5}]{tissue-fem-lbv-p5-reg.PNG}{width=.85\linewidth}{Diferencia de \textit{phase tissue} FEM - LBV, en ppm, con erosión de 5 vóxeles.}
+
+\subsection{Sin erosión}
+
+Sin erosión, LBV obtiene los resultados de la Figura \ref{img:lbv-p0}. Como se esperaba, el ruido es bastante mayor que antes.
+
+\insertimage[\label{img:lbv-p0}]{lbv-p0.PNG}{width=.85\linewidth}{\textit{Phase tissue} obtenida con LBV, en ppm, sin erosión.}
+
+\subsubsection{FEM: Malla no regular}
+
+Usando una malla no regular (igual que antes ver \nameref{noref} en \nameref{anexos}), vemos los resultados de la Figura \ref{img:fem-noreg-p0}. Notamos que el ruido en la imagen es mucho más visible que para LBV.
+
+\insertimage[\label{img:fem-noreg-p0}]{tissue-fem-p0.PNG}{width=.85\linewidth}{\textit{Phase tissue} obtenida con FEM, en ppm, sin erosión.}
+
+Nuevamente, las mayores diferencias entre FEM y LBV se encuentran en el borde, y esta vez la Figura \ref{img:fem-noreg-lbv-p0} también muestra una componente suave en la diferencia, una que alguno de los métodos está fallando en eliminar. 
+
+\insertimage[\label{img:fem-noreg-lbv-p0}]{tissue-fem-lbv-p0.PNG}{width=.85\linewidth}{Diferencia de \textit{phase tissue} FEM - LBV, en ppm, sin erosión.}
+
+\subsubsection{FEM: Malla regular}
+
+
+Para el caso sin erosión, nuevamente vemos mucho error, pero el resultado obtenido es mejor que el logrado con la malla no regular. Nuevamente vemos una zona negra en la parte superior derecha de la imagen central, aunque, en contra de lo esperable, es de menor tamaño que en el caso con mayor erosión.
+
+\insertimage[\label{img:fem-reg-p0}]{tissue-fem-p0-reg.PNG}{width=.85\linewidth}{\textit{Phase tissue} obtenida con FEM, en ppm, sin erosión.}
+
+Nuevamente, en la Figura \ref{img:fem-reg-lbv-p0} se observa la componente suave que no fue removida por alguno de los métodos.
+
+\insertimage[\label{img:fem-reg-lbv-p0}]{tissue-fem-lbv-p0-reg.PNG}{width=.85\linewidth}{Diferencia de \textit{phase tissue} FEM - LBV, en ppm, sin erosión.}
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+\newpage
+\subsection{Comparación mediante RMSE}
+
+Un indicador de la calidad de un método es \textit{Root mean square error} (RMSE) (mientras más cercano a $0$ mejor). Una comparación entre los dos métodos usando este indicador se encuentra en la Tabla \ref{table:rmse}.
+
+Para obtener estos valores se realizó la reconstrucción usando \textit{Thresholded K-space Division} (TKD), que consiste en cambiar los $0$s del cono mágico por un valor $\varepsilon > 0$, lo que permite realizar la inversión.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+ & \multicolumn{2}{|c|}{RMSE} &\\
+\cline{2-3}
+Erosión & LBV & FEM & Tipo de malla \\
+\hline
+\hline
+\multirow{2}{5em}{5 vóxeles} & \multirow{2}{3em}{$70.4$} & $71.8$ & No regular\\
+\cline{3-4}
+& & $144.1$ & Regular \\
+\hline
+\hline
+\multirow{2}{5em}{Sin erosión} & \multirow{2}{3em}{$129.4$} & $218.5$ & No regular\\
+\cline{3-4}
+& & $165.2$ & Regular\\
+\hline
+\end{tabular}
+\caption{Comparación por RMSE entre LBV y FEM}
+\label{table:rmse}
+\end{table}
+
+
+Los altos valores de RMSE se explican porque no se prestó especial atención a la etapa de reconstrucción, y solo se usó TKD, el método menos sofisficado.
+
+Vemos que LBV consigue resultados mejores en todos los casos. La malla no regular funciona bastante mal en el caso sin erosión. Al pasar de erosión de 5 vóxeles a trabajar sin erosión aumenta mucho el error tanto en LBV como en la malla no regular, pero el error crece mucho menos para la malla regular.
+  
+\subsection{Tiempos de ejecución}
+
+Usar FEM resulta bastante más costoso: en un notebook con Intel i3-4005U con dos procesadores a 1.70GHz y 8GB de RAM, LBV tarda menos de 10 segundos, mientras que con FEM, generar la malla lleva unos 15 segundos en el caso regular y unos 4 minutos en el caso no regular. Además, exportar los datos para trabajar en FEniCS e importarlos de regreso se hace de una forma muy lenta, ya que Matlab no trabaja con archivos \texttt{.vtu} y estos deben escribirse manualmente. Esto tarda unos 3 o 4 minutos extra. Esto se podría corregir resolviendo todo en Matlab.
+
+
+\section{Conclusiones}
+
+Se logra implementar \textit{Background removal} usando Elementos Finitos, pero en general FEM resulta peor que LBV, tanto en tiempo de ejecución como en calidad de los resultados.
+
+Se esperaba mejorar la reconstrucción en los bordes de la ROI, sin embargo, con los dos tipos de malla usados se pierden algunos vóxeles cerca de la frontera, lo que empeora la calidad en esa zona.
+
+Quedó pendiente averiguar de dónde procedía la componente suave al interior de la ROI que aparecía en la diferencia de las \textit{phase tissue} entre FEM y LBV.
+

@@ -1,0 +1,60 @@
+\newpage
+
+\section{Generar la malla}
+
+Para resolver la ecuación con Elementos Finitos se necesita una malla de tetrahedros. Esta se genera en Matlab a partir de una \textit{máscara} del cerebro, obtenida a partir de los datos medidos. Se trabaja con dos tipos de malla: regular y no regular. 
+
+
+\subsection{Malla no regular}
+
+La generación de la malla no regular usa fuertemente el toolbox \href{http://iso2mesh.sourceforge.net/cgi-bin/index.cgi}{iso2mesh} de Matlab, y se condensa en la función \texttt{unstructured\_meshing}. Esta, en el atributo \texttt{mask}, toma una \textit{máscara} binaria de la ROI y crea la malla en varias etapas:
+
+\begin{enumerate}
+    \item Suavizar la máscara con un kernel de convolución. Se hace con la función \texttt{smooth3} de Matlab.
+    \item Hacer una malla de la frontera de la ROI. Esto se hace a través de la función \texttt{mesh\_boundary}, la cual encuentra el borde viéndolo como una isosuperficie de valor $0.5$. Esto pues el borde es la zona donde los valores de la máscara cambian de $0$ a $1$.
+    \item Remallar la frontera usando los parámetros \texttt{gridsize}, \texttt{closesize}, \texttt{elemsize}, a través de la función \texttt{remeshsurf} de \texttt{iso2mesh}. Ver su documentación para más detalle de los parámetros.
+    \item Suavizar la malla de la frontera con un filtro laplaciano. Se hace mediante la función \texttt{smoothsurf} de \texttt{iso2mesh}.
+    \item Crear la malla de la ROI a partir de la malla de la frontera, usando los parámetros \texttt{keep\_ratio} (proporción de elementos que se mantendrán) y \texttt{vol\_factor} (el volumen máximo de cada elemento será $0.12 \, \cdot$ \texttt{vol\_factor}. $0.12$ es el volumen de un tetrahedro regular de lado $1$). Se hace mediante la función \texttt{s2m} de \texttt{iso2mesh}.
+\end{enumerate}
+
+Un ejemplo de cómo usar la función se encuentra en el script \texttt{example\_meshing.m}. Antes de ejecutarlo se deben considerar lo siguiente:
+
+
+\begin{enumerate}
+    \item La línea \texttt{addpath('../../iso2mesh/')} debería cambiarse para que coincida con el path a \texttt{iso2mesh}, o eliminarse si ya está en el path de Matlab.
+    \item El script usa una máscara erosionada (ver la subsección \nameref{datos} de \nameref{anexos}). Se pide ingresar el \texttt{peel} adecuado, dependiendo de la máscara que se está usando: $0$ para \texttt{mask\_p0.mat}, $1$ para \texttt{mask\_p1.mat} y $5$ para \texttt{mask\_p5.mat}. Esto solo influye en el nombre de la carpeta donde serán guardados los datos.
+    \item Se generará una nueva carpeta al interior de \texttt{results/}, cuyo nombre dependerá de los parámetros usados, mediante la función \texttt{generate\_folder\_name}. El nombre de esta carpeta también quedará guardado en \texttt{examples/folder\_name.txt}, y será usado posteriormente por el script \texttt{examples/example\_solving.py} 
+    \item En esta carpeta se guardará un archivo \texttt{mesh\_data.vtu} que contiene los datos de la malla creada y de la fase, obtenida de \texttt{phs\_unwrap.mat}. Se guarda también un histograma del tamaño de los elementos de la malla, una imagen de la malla (ver Figura \ref{img:irregular}) y un archivo \texttt{log\_mesh.txt} que contiene la salida en consola generada por \texttt{iso2mesh} al crear la malla.
+\end{enumerate}
+
+
+\begin{images}[\label{img:irregular}]{Malla generada por \texttt{example\_meshing.m}}
+    \addimage{mesh.png}{height=6cm}{Malla}
+    \addimage{hist_area_vol_mesh.png}{height=6cm}{Histogramas: tamaño de los elementos}
+\end{images}
+
+
+
+
+\subsection{Malla regular}
+
+La malla regular se crea replicando una triangulación de Delauney de un cubo en cada agrupación cúbica de 8 nodos vecinos (ver Figura \ref{img:idea}). Esto se hace solamente para las agrupaciones completas, es decir, aquellas cuyos 8 nodos corresponden a un valor $1$ es la máscara binaria. 
+
+
+\insertimage[\label{img:idea}]{regularmesh.eps}{width=0.5\linewidth}{Idea para generar la malla regular}
+
+Se hace notar esto puede producir pérdida de datos en la frontera de la malla, lo que no se logró corregir. Para ilustrar esto basta considerar una máscara como la de la Figura \ref{img:borde-malo}, donde todas las posibles agrupaciones de 8 vecinos están incompletas, por lo que no es posible generar una malla regular de esta manera.
+
+\begin{images}[\label{img:borde-malo}]{Ejemplo de máscara problemática}
+    \addimage{malla-mala.eps}{height=4cm}{Máscara problemática}
+    \addimage{piezas-chicas.eps}{height=4cm}{Intentos de agrupaciones de 8 vecinos}
+\end{images}
+
+
+Puesto que no se creó como función de Matlab, el mallado regular solo se encuentra disponible a través del script \texttt{Example\_regular\_mesh.m}. La máscara debe quedar guardada en la variable \texttt{SEG}.
+
+
+\begin{images}[\label{img:regular}]{Malla regular generada por por \texttt{Example\_regular\_mesh.m}}
+    \addimage{regular.PNG}{height=6cm}{Malla}
+    \addimage{zoom.PNG}{height=6cm}{Zoom a los elementos.}
+\end{images}

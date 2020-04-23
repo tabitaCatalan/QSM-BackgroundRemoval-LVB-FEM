@@ -1,0 +1,28 @@
+\newpage
+
+% Evaluación crítica del desarrollo de la práctica, señalando logros y limitaciones (máximo 1 página).
+\section{Visualizar resultados y comparar}
+
+Una vez se ha obtenido una solución con FEniCS, se importa a Matlab, donde se termina el proceso de QSM con la etapa de Reconstrucción. Para estudiar la eficacia del método, se usan datos de \cite{challenge} y se comparan los resultados con los obtenidos con \texttt{LBV} (\cite{lbv_fmg}) del \texttt{MEDI\_toolbox}. Esto puede hacerse mediante métricas como \textit{Root Mean Squared Error} (RMSE), o visualmente, restando el resultado con un \textit{ground truth} y estudiando la imagen obtenida. Esto se realizó mediante el script \texttt{example\_read\_compare\_solution.m}
+
+Algunas consideraciones:
+
+
+\begin{enumerate}
+    \item Al cargar los datos, se espera que tanto la máscara como la fase usada tengan el mismo nivel de erosión (ver subsección \nameref{datos} en \nameref{anexos}). Esto significa usar \texttt{mask\_p0.mat} junto a \texttt{phs\_lbv\_p0.mat}, \texttt{mask\_p1.mat} junto a \texttt{phs\_lbv\_p1.mat} etc. Los datos elegidos deben quedar en las variables \texttt{mask} y \texttt{phs\_lbv}.
+    \item El script supone que existe un archivo \texttt{Solution000001.vtu'} al interior de la carpeta en \texttt{results} cuyo nombre aparece, al igual que antes, en \texttt{examples/folder\_name.txt}. Esto es cierto si se ejecutó \texttt{examples/example\_solving.py} antes.
+\end{enumerate}
+
+El script está basado en \cite{challenge} y \cite{fansi}, y utiliza varias funciones sacadas de \cite{challenge} como \texttt{compute\_rmse}, \texttt{imagesc3d2}, \texttt{polyfit3D\_NthOrder} y \texttt{TKD}. Un resumen de lo que hace:
+
+
+\begin{enumerate}
+    \item Obtiene el ruido armónico a partir de \texttt{'Solution000001.vtu'}.
+    \item Interpola el ruido desde la malla a la grilla original de $160 \times 160 \times 160$.
+    \item Calcula la \textit{phase tissue} y la escala por un valor que depende del campo magnético $B_0$ al que fueron sometidos los tejidos, el radio giromagnético $\gamma$ y el tiempo de eco $TE$.
+    \item Se ajusta un polinomio 3D de orden 4 a los datos, con el fin de remover la \textit{transmit phase} (ver \cite{challenge}).
+    \item Se reconstruye usando \texttt{TKD}.
+    \item Se calcula el error RMSE con \texttt{compute\_rmse}.
+\end{enumerate}
+
+El mismo procesamiento se hace para la fase que se obtiene a partir de método \texttt{LBV}.

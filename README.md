@@ -3,7 +3,7 @@
 A Matlab toolbox for Background field removal in Quatitative Susceptibility Mapping, by solving Laplacian Boundary Value problem, using Finite Elements.
 
 ## How to use
-Information about how to use can be found [here](../report/Background_removal_FEM.pdf).
+Information about how to use can be found [here](../master/report/Background_Removal_FEM.pdf).
 
 
 
